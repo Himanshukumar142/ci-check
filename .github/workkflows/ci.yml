@@ -1,6 +1,9 @@
-name: CI Pipeline
+name: CI
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -12,6 +15,6 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: 17
+          distribution: temurin
 
       - run: mvn clean install
-      - run: mvn test
