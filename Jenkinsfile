@@ -1,35 +1,38 @@
 pipeline {
-	agent any
+	agent none
 
 	stages {
+		stage('Build & Test') {
+			agent {
+				docker {
+					image 'maven:3.8.8-openjdk-11'
+					args '-u root:root'
+				}
+			}
 
-		stage('Checkout') {
 			steps {
 				checkout scm
+				sh 'mvn clean test'
+			}
+			steps {
+				sh "mvn clean package"
+			}
+			steps{
+				sh "docker build -t my-app ."
+			}
+			
+			post {
+				always {
+					junit 'target/surefire-reports/*.xml'
+					archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+				}
 			}
 		}
+	}
 
-		stage('Build') {
-			steps {
-				sh 'mvn -B -DskipTests clean package'
-			}
-		}
-
-		stage('Docker Build') {
-			steps {
-				sh 'docker build -t my-app:latest .'
-			}
-		}
-
-		stage('Run') {
-			steps {
-				echo 'running the container'
-				sh '''
-					docker stop my-app || true
-					docker rm my-app || true
-					docker run -d --name my-app my-app:latest
-				'''
-			}
+	post {
+		always {
+			cleanWs()
 		}
 	}
 }
