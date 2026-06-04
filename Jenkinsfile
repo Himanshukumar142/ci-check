@@ -21,11 +21,11 @@ pipeline {
 
 				  stages {
 				    stage('Test') {
-				      steps {
+				      steps { 
 				        checkout scm
-				        sh 'mvn -B clean test'
+				        sh 'mvn clean test'
 				      }
-				      post {
+				      post { 
 				        always {
 				          junit 'target/surefire-reports/*.xml'
 				          archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
