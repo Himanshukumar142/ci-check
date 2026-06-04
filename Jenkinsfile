@@ -11,21 +11,34 @@ pipeline {
 			}
 
 			steps {
-				checkout scm
-				sh 'mvn clean test'
-			}
-			steps {
-				sh "mvn clean package"
-			}
-			steps{
-				sh "docker build -t my-app ."
-			}
-			
-			post {
-				always {
-					junit 'target/surefire-reports/*.xml'
-					archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+				pipeline {
+				  agent {
+				    docker {
+				      image 'maven:3.8.8-openjdk-11'
+				      args '-u root:root'
+				    }
+				  }
+
+				  stages {
+				    stage('Test') {
+				      steps { 
+				        checkout scm
+				        sh 'mvn clean test'
+				      }
+				      post { 
+				        always {
+				          junit 'target/surefire-reports/*.xml'
+				          archiveArtifacts artifacts: 'target/surefire-reports/**', fingerprint: true
+				        }
+				      }
+				    } 
+				  }
+
+				  post {
+				    always { cleanWs() }
+				  }
 				}
+<<<<<<< HEAD
 			}
 		}
 	}
@@ -36,4 +49,6 @@ pipeline {
 		}
 	}
 }
+=======
+>>>>>>> 1e06d989f6bc13a9e6d746f5c525f8c46991745b
 
